@@ -1,0 +1,74 @@
+$def with(userid,username,str)
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>项目进度控制系统</title>
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="../static/css/fromtoright.css" rel="stylesheet">
+    <link type="text/css" href="../static/css/highlight.css" rel="stylesheet"/>
+    <link type="text/css" href="../static/css/timeline.css" rel="stylesheet"/>
+    <link href="../static/css/metro.css" rel="stylesheet">
+    <link href="../static/css/metro-icons.css" rel="stylesheet">
+    <link href="../static/css/docs.css" rel="stylesheet">
+    <script src="../static/js/select2.min.js"></script>
+    <script src="../static/js/metro.js"></script>
+    <script src="../static/js/docs.js"></script>
+    <script src="../static/js/jquery-2.1.1.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/main.js"></script>
+    <style>
+        body{
+            padding-top: 50px;
+        }
+    </style>
+</head>
+<script type="text/javascript">
+    function tianxie() {
+        document.getElementById("userid").value = '$userid';
+        document.getElementById("username").value = '$username';
+    }
+</script>
+<body>
+
+<div class="container" >
+    <div class="page-header">
+        <h4>$username<small>$userid</small></h4>
+    </div>
+    <div class="timeline">
+        <div class="line text-muted"></div>
+        <article class="panel panel-info panel-outline">
+            <div class="panel-heading icon">
+                <i class="glyphicon glyphicon-plus"></i>
+            </div>
+            <a href="#" onclick="parent.location='/addsteppage?UserId=$userid&UserName=$username'"><h4>增加内容<br><br><br><br></h4></a>
+            $:str
+        </article>
+    </div>
+    <div class="row">
+        <form method="post" action="addwork" class="col-md-9 go-right">
+            <input id="userid" type="text" name="data"  hidden></a>
+            <input id="username" type="text" name="data"  hidden></a>
+            <div class="form-group">
+                <input class="form-control"  style="height:40px" type="date" name="data" value="2011-01-01" class="input-xlarge" required>
+                <label for="name">日期自</label>
+            </div>
+            <div class="form-group">
+                <input class="form-control"  style="height:40px" type="date" name="data" value="2011-01-01" class="input-xlarge" required>
+                <label for="name">日期至</label>
+            </div>
+            <div class="form-group">
+                <textarea class="form-control" style="height:150px" name="data" placeholder="备注"></textarea>
+                <label for="name">备注</label>
+            </div>
+            <input type="submit" value="提交" onclick="tianxie()">
+        </form>
+        <br>
+        <br>
+        <br>
+    </div>
+</div>
+
+</body>
+</html>

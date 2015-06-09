@@ -1,0 +1,97 @@
+$def with(s1,s2,userid,username,wfid,check)
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>项目进度控制系统</title>
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="../static/js/jquery-2.1.1.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <style>
+        body{
+            padding-top: 60px;
+        }
+    </style>
+</head>
+<script>
+    var url = document.location.search;
+    var arr = url.split('&');
+    var a=arr[0].split('=')[1];
+</script>
+<script type="text/javascript">
+    function tianxie() {
+        document.getElementById("workflowid").value = '$wfid';
+        document.getElementById("userid").value = '$userid';
+        document.getElementById("username").value = '$username';
+        document.getElementById("check").value = a;
+        if (a==1){
+            document.getElementById("ck").value='已关注';
+        }else{
+            document.getElementById("ck").value='未关注'
+        }
+    }
+    function zhuanbian(){
+        if (document.getElementById("ck").value=='已关注')
+        {
+            document.getElementById("ck").value='未关注';
+        }else{
+            document.getElementById("ck").value='已关注';
+        }
+    }
+
+</script>
+<body  onload="tianxie()">
+<div class="container" >
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="tab-title container" >
+            <div>
+                <ul class="nav navbar-nav row">
+                    <li class="dropdown  col-xs-6">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            选项<b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" onclick="parent.location='/sys?UserId=$userid&UserName=$username'">待办事项</a></li>
+                            <li><a href="#" onclick="parent.location='/addWorkflow?UserId=$userid&UserName=$username'">新增流程</a></li>
+                            <li><a href="#" onclick="parent.location='/workflowcheck?UserId=$userid&UserName=$username'">流程查询</a></li>
+                            <li><a href="#" onclick="parent.location='/weekwork?UserId=$userid&UserName=$username'">工作周报</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav navbar-nav col-xs-6">$username $userid</li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="checkchange">
+        <h5>$:s1</h5>
+        <table class="table table-bordered table-hover" align="left">
+            <thead>
+            <tr>
+                <th class="col-md-2">进度日期</th>
+                <th class="col-md-2">处理人</th>
+                <th class="col-md-2">状态</th>
+                <th class="col-md-4">内容</th>
+                <th class="col-md-2">转发</th>
+            </tr>
+            </thead>
+            $:s2
+        </table>
+        <form method="post" action="checkchange">
+            <input id="check" type="text" name="data"  hidden></a>
+            <input id="userid" type="text" name="data"  hidden></a>
+            <input id="username" type="text" name="data"  hidden></a>
+            <input id="workflowid" type="text" name="data"  hidden></a>
+            <ul>
+                <div class="row">
+                    <a class="col-xs-4 list-group-item" style="height:35px" onclick="zhuanbian()">调整</a>
+                    <input class="col-xs-4 list-group-item disabled" id="ck" style="height:35px" name="data" type="text" />
+                </div>
+            </ul>
+            <input type="submit" value="提交">
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

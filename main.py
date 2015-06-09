@@ -90,6 +90,8 @@ sCorpSecret = 'nuoYdEnwZli9Oi016OjltxMIbYbyhtdyoC55uKtYkdP8a9ndVOFW4qNkvH_eydLz'
 global Access_token
 AccessTokenExpireDuration = 7200
 
+web.config.debug = False
+
 def RefreshAccessToken(threadName, delay):
     global Access_token
     url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=' + sCorpID + '&corpsecret=' + sCorpSecret
@@ -173,7 +175,11 @@ def LoadWFdetails(userid):
             if (not userlistdata.looker.strip() == ''):
                 if (FindList(looker, str(workflowdata.id))):
                     check = 'checked'
-            line=[workflowdata.id,workflowdata.flowname,workflowdata.updatetime,workflowdata.flowdate,workflowdata.flowdetails,workflowdata.id,check]
+            workflowtree._meta.db_table = workflowdata.workflowtreename
+            participants=''
+            for participant in workflowtree().select(workflowtree.username).distinct():
+                participants+=participant.username+' '
+            line=[workflowdata.id,workflowdata.flowname,workflowdata.updatetime,workflowdata.flowdate,workflowdata.flowdetails,workflowdata.id,check,participants]
             data.append(line)
     return data
 
@@ -204,9 +210,6 @@ def Transmit(wft, sendee, time):
             employeeList.save()
 
         wf = workflow.get(workflow.id == wft.workflowid)
-        print wf.flowname
-        print wft.username
-        print wft.details
         content = wft.username + '：项目《' + wf.flowname + '》进展为「' + wft.details + '」'+'，并邀请您加入。'
 
         url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + Access_token + '&debug=1'
@@ -218,14 +221,23 @@ def Transmit(wft, sendee, time):
 
 def GetOption():
     global Access_token
+
     #options = '<option></option>'
+    #<optgroup label="Eastern Time Zone">
+    #</optgroup>
     options=''
-    url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=' + Access_token + '&department_id=1&fetch_child=1&status=0';
+    url='https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token='+Access_token
     resp = urllib2.urlopen(url)
     result = json.loads(resp.read())
-    if (result['errcode'] == 0):
-        for value in result['userlist']:
-            options += '<option>' + value['userid'] + '-' + value['name'] + '</option>'
+    for department in result['department']:
+        if (department['parentid']==1):
+            options+='<optgroup label=\"'+department['name']+'\"></optgroup>'
+            url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=' + Access_token + '&department_id='+str(department['id'])+'&fetch_child=1&status=0';
+            resp = urllib2.urlopen(url)
+            result = json.loads(resp.read())
+            if (result['errcode'] == 0):
+                for value in result['userlist']:
+                    options += '<option>' + value['userid'] + '-' + value['name'] + '</option>'
     return options
 
 
@@ -347,8 +359,7 @@ class AddSteppage:
             return render.closepage()
         global Access_token
         i = web.input(data=[])
-        print i
-        print '-----------'
+
         nowtime = time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
         workflowdata = workflow.get(workflow.id == i.data[3])
         workflowdata.updatetime = nowtime
@@ -416,6 +427,9 @@ class WorkflowDetail:
         else:
             return render.closepage()
         i = web.input()
+        print i
+        print cookies
+        print '--------------'
         workflowdata = workflow.get(workflow.id == i.workflowid)
         return render.workflowdetail(LoadWFTdetails(i.workflowid, userid,username),i.workflowid,workflowdata.flowname)
 
@@ -485,7 +499,7 @@ class AddWorkflow:
     #跳转至增加工作流页面
     def GET(self):
         cookies = web.cookies()
-        print cookies
+
         if (cookies.get('userid')):
             userid=cookies.userid
             username=cookies.username
@@ -505,6 +519,8 @@ class Syspage:
 
         userid=''
         username=''
+        position=''
+        department=''
         if (dataFromWeXin.get('code')):
             code = dataFromWeXin.code
             url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=' \
@@ -516,7 +532,6 @@ class Syspage:
             result = json.loads(resp.read())
 
             logging.debug('WeXin Response = |%s|' % result)
-
             if (result.has_key('UserId')):
                 userid = result['UserId']
                 url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=' \
@@ -543,8 +558,7 @@ class Syspage:
                 web.setcookie('username', username, holdtime)
                 web.setcookie('position', position, holdtime)
                 web.setcookie('department', department, holdtime)
-
-        if (userid.split()==''):
+        if (userid.strip()==''):
             cookies = web.cookies()
             if (cookies.get('userid')):
                 userid=cookies.userid

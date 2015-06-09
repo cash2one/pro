@@ -31,29 +31,32 @@ $def with(str)
 <body>
 <div class="container">
     <div class="row">
-            <h3 class="text-right"><a href="#" onclick="parent.location='/addworkflowpage'">
+            <h3 class="text-center"><a href="#" onclick="parent.location='/addworkflowpage'">
                 <i class="glyphicon glyphicon-plus"></i>新增项目</a>
             </h3>
             $for data in str:
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div class="box">
                         <div class="info">
-                            <h4 class="text-center">
-                                <a href="#" style="text-decoration:underline" class="btn-default" onclick="parent.location='/workflowdetail?workflowid=$data[0]'">$data[1]</a>
-                            </h4>
+                            <h5 class="text-center btn-primary btn-lg btn-block">
+                                <p onclick="parent.location='/workflowdetail?workflowid=$data[0]'">$data[1]</p>
+                                <!--<a href="#" class="btn-default" onclick="parent.location='/workflowdetail?workflowid=$data[0]'">$data[1]</a>-->
+                            </h5>
                             <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>更新时间：$data[2]</small></p>
                             <p style="color: #000000">开始时间：$data[3]</p>
                             <p style="color: #000000">项目描述：$data[4]</p>
                             <p style="color: #000000">关注更新：<input id="$data[5]" type="checkbox" onchange="attention($data[5])" $data[6]></p>
+                            <p style="color: #000000">参与人员：$data[7]</p>
                         </div>
                     </div>
                 </div>
-            <br>
-            <br>
-            <br>
-            <br>
         </div>
-    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+</div>
 
 
 </div>

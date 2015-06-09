@@ -1,4 +1,4 @@
-$def with(str,userid,username,workflowid)
+$def with(str,workflowid)
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -27,21 +27,17 @@ $def with(str,userid,username,workflowid)
     </style>
 </head>
 <script type="text/javascript">
-    function tianxie() {
-        document.getElementById("userid").value = '$userid';
-        document.getElementById("username").value = '$username';
+    function FillContents() {
         document.getElementById("bz").value = 'add';
         document.getElementById("workflowid").value = '$workflowid';
         workflowid
     }
 </script>
-<body onload="tianxie()">
+<body onload="FillContents()">
 <div class="container" >
     <div class="row">
         <form method="post" action="addstep"  class="col-md-9 go-right">
             <input id="bz" type="text" name="data"  hidden></a>
-            <input id="userid" type="text" name="data"  hidden></a>
-            <input id="username" type="text" name="data"  hidden></a>
             <div class="form-group">
                 <input class="form-control"  style="height:40px" type="date" name="data" value="" class="input-xlarge" required>
                 <label for="name">日期</label>
@@ -52,7 +48,7 @@ $def with(str,userid,username,workflowid)
                 </select>
             </div>
             <div class="form-group">
-                <textarea class="form-control" style="height:150px" name="data" placeholder="备注"></textarea>
+                <textarea class="form-control" style="height:150px" name="data" placeholder="备注" required></textarea>
              </div>
             <input id="workflowid" type="text" name="data"  hidden></a>
             <input type="submit" value="提交">

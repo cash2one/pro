@@ -1,4 +1,4 @@
-$def with(str,userid,username)
+$def with(str)
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -22,18 +22,10 @@ $def with(str,userid,username)
         }
     </style>
 </head>
-<script type="text/javascript">
-    function tianxie() {
-        document.getElementById("userid").value = '$userid';
-        document.getElementById("username").value = '$username';
-    }
-</script>
 <body>
 <div class="container" >
     <div class="row">
-    <form method="post" action="addworkflow" role="form" class="col-md-9 go-right">
-        <input id="userid" type="text" name="data"  hidden></a>
-        <input id="username" type="text" name="data"  hidden></a>
+    <form method="post" action="addworkflow" role="form" class="col-md-9 go-rig">
         <div class="form-group">
             <input class="form-control" type="text" name="data" value=""  class="input-xlarge" placeholder="项目" required>
             <!--<label for="name">名称</label>-->
@@ -42,15 +34,15 @@ $def with(str,userid,username)
             <input class="form-control"  style="height:40px" type="date" name="data" value="" class="input-xlarge" required>
             <label for="name">日期</label>
         </div>
-            <div class="form-group" data-role="select" data-multiple="true" data-placeholder="请选择转发人">
+            <div class="form-group" data-role="select" data-multiple="true" data-placeholder="请选择转发人" >
                 <select class="js-example-basic-multiple js-states form-control" multiple="multiple" name="option">
                     $:str
                 </select>
             </div>
         <div class="form-group">
-            <textarea class="form-control" style="height:150px" name="data" placeholder="项目描述"></textarea>
+            <textarea class="form-control" style="height:150px" name="data" placeholder="项目描述" required></textarea>
         </div>
-        <input type="submit" value="提交" onclick="tianxie()">
+        <input type="submit" value="提交">
     </form>
     </div>
 </div>

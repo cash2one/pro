@@ -1,4 +1,4 @@
-$def with(userid,username,workflowid,workflowtreeid,date,details)
+$def with(workflowid,workflowtreeid,date,details)
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -17,8 +17,6 @@ $def with(userid,username,workflowid,workflowtreeid,date,details)
 </head>
 <script type="text/javascript">
     function FillContents() {
-        document.getElementById("userid").value = '$userid';
-        document.getElementById("username").value = '$username';
         document.getElementById("workflowtreeid").value = '$workflowtreeid';
         document.getElementById("workflowid").value = '$workflowid';
         document.getElementById("date").value = '$date';
@@ -31,8 +29,6 @@ $def with(userid,username,workflowid,workflowtreeid,date,details)
     <div class="row">
         <form method="post" action="changestep" role="form" class="col-md-9 go-right">
             <input id="bz" type="text" name="data"  hidden></a>
-            <input id="userid" type="text" name="data"  hidden></a>
-            <input id="username" type="text" name="data"  hidden></a>
             <div class="form-group">
                 <input id='date' class="form-control"  style="height:40px" type="date" name="data" class="input-xlarge" required>
                 <label for="name">日期</label>

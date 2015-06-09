@@ -1,4 +1,4 @@
-$def with(userid,username,str)
+$def with(str)
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -24,12 +24,6 @@ $def with(userid,username,str)
         }
     </style>
 </head>
-<script type="text/javascript">
-    function tianxie() {
-        document.getElementById("userid").value = '$userid';
-        document.getElementById("username").value = '$username';
-    }
-</script>
 <body>
 
 <div class="container" >
@@ -48,8 +42,6 @@ $def with(userid,username,str)
     </div>
     <div class="row">
         <form method="post" action="addwork" class="col-md-9 go-right">
-            <input id="userid" type="text" name="data"  hidden></a>
-            <input id="username" type="text" name="data"  hidden></a>
             <div class="form-group">
                 <input class="form-control"  style="height:40px" type="date" name="data" value="2011-01-01" class="input-xlarge" required>
                 <label for="name">日期自</label>
@@ -62,7 +54,7 @@ $def with(userid,username,str)
                 <textarea class="form-control" style="height:150px" name="data" placeholder="备注"></textarea>
                 <label for="name">备注</label>
             </div>
-            <input type="submit" value="提交" onclick="tianxie()">
+            <input type="submit" value="提交" >
         </form>
         <br>
         <br>

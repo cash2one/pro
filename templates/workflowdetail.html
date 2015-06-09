@@ -1,4 +1,4 @@
-$def with(str,userid,username,workflowid,workflowname)
+$def with(str,workflowid,workflowname)
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -26,13 +26,13 @@ $def with(str,userid,username,workflowid,workflowname)
             <div class="panel-heading icon">
                 <i class="glyphicon glyphicon-arrow-left"></i>
             </div>
-            <a href="#" onclick="parent.location='/checkworkflow?UserId=$userid&UserName=$username'"><h4>返回上一级<br></h4></a>
+            <a href="#" onclick="parent.location='/checkworkflow'"><h4>返回上一级<br></h4></a>
         </article>
         <article class="panel panel-info panel-outline">
             <div class="panel-heading icon">
                 <i class="glyphicon glyphicon-plus"></i>
             </div>
-            <a href="#" onclick="parent.location='/addsteppage?UserId=$userid&UserName=$username&workflowid=$workflowid'"><h4>增加内容<br></h4></a>
+            <a href="#" onclick="parent.location='/addsteppage?workflowid=$workflowid'"><h4>增加内容<br></h4></a>
         </article>
         <article class="panel panel-info panel-outline">
             $for data in str:
@@ -41,7 +41,6 @@ $def with(str,userid,username,workflowid,workflowname)
                         <blockquote>
                             <p>$data[1]</p>
                             <footer>$data[2] $:data[3]</footer>
-                            $data[3]
                         </blockquote>
                 </div>
         </article>

@@ -1,4 +1,4 @@
-$def with(str,userid,username)
+$def with(str)
 
 <!DOCTYPE html>
 <html>
@@ -24,14 +24,14 @@ $def with(str,userid,username)
         xmlhttp=new XMLHttpRequest();
         xmlhttp.open("GET","attontion",true);
         xmlhttp.send();
-        xmlhttp.open("GET","attontion?userid=$userid&workflowid="+workflowid+"&attontion="+bz,true);
+        xmlhttp.open("GET","attontion?workflowid="+workflowid+"&attontion="+bz,true);
         xmlhttp.send();
     }
 </script>
 <body>
 <div class="container">
     <div class="row">
-            <h3 class="text-right"><a href="#" onclick="parent.location='/addworkflowpage?UserId=$userid&UserName=$username'">
+            <h3 class="text-right"><a href="#" onclick="parent.location='/addworkflowpage'">
                 <i class="glyphicon glyphicon-plus"></i>新增项目</a>
             </h3>
             $for data in str:
@@ -39,12 +39,12 @@ $def with(str,userid,username)
                     <div class="box">
                         <div class="info">
                             <h4 class="text-center">
-                                <a href="#" style="text-decoration:underline" class="btn-default" onclick="parent.location='/workflowdetail?UserId=$data[0]&UserName=$data[1]&workflowid=$data[2]'">$data[3]</a>
+                                <a href="#" style="text-decoration:underline" class="btn-default" onclick="parent.location='/workflowdetail?workflowid=$data[0]'">$data[1]</a>
                             </h4>
-                            <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>更新时间：$data[4]</small></p>
-                            <p style="color: #000000">开始时间：$data[5]</p>
-                            <p style="color: #000000">项目描述：$data[6]</p>
-                            <p style="color: #000000">关注更新：<input id="$data[7]" type="checkbox" onchange="attention($data[7])" $data[8]></p>
+                            <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>更新时间：$data[2]</small></p>
+                            <p style="color: #000000">开始时间：$data[3]</p>
+                            <p style="color: #000000">项目描述：$data[4]</p>
+                            <p style="color: #000000">关注更新：<input id="$data[5]" type="checkbox" onchange="attention($data[5])" $data[6]></p>
                         </div>
                     </div>
                 </div>

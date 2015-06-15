@@ -1,0 +1,96 @@
+$def with(str,workflowname)
+
+<!DOCTYPE html>
+
+<html>
+
+<head lang="en">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>$workflowname</title>
+
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <link type="text/css" href="../static/css/timeline.css" rel="stylesheet"/>
+
+    <script src="../static/js/jquery.min.js"></script>
+
+    <script src="../static/js/bootstrap.min.js"></script>
+
+    <style>
+
+        body{
+
+            padding-top: 20px;
+
+        }
+
+    </style>
+
+</head>
+
+<body onload="FillContents()">
+
+<div class="container">
+
+
+    <div class="timeline">
+
+        <div class="line text-muted"></div>
+
+        <article class="panel panel-info panel-outline">
+            <div class="panel-heading icon">
+                <i class="glyphicon glyphicon-arrow-left"></i>
+            </div>
+            <a href="#" onclick="parent.location='/checkcloseflow'"><h4>返回项目列表<br><br></h4></a>
+        </article>
+
+        <!--<div class="separator text-muted"></div>-->
+
+        $for line in str:
+
+        <article class="panel panel-success" style="margin: 10px 0px 0px 30px;">
+
+            <div class="panel-heading">
+
+                <a data-toggle="collapse" href="#$line[1]"><h5>$line[1]</h5></a>
+
+            </div>
+
+            <div id="$line[1]" class="panel-collapse collapse $line[2]">
+
+                $for data in line[0]:
+
+                <ul class="list-group">
+
+                    <li class="list-group-item">
+
+                        <pre>$:data[1] $:data[3]</pre>
+
+                        <small>
+                            <div class="row">
+                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 text-left" >$data[2] $data[0]</div>
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-right">$:data[3]</div>
+                            </div>
+                        </small>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+</div>
+
+</body>
+
+</html>
+

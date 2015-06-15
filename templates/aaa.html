@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link type="text/css" href="../static/css/timeline.css" rel="stylesheet"/>
+</head>
+<script>
+    function aaa(){
+        alert(document.getElementById("ooo").value)
+        xmlhttp=new XMLHttpRequest();
+        xmlhttp.open("GET","aaa?hhh=1&ddd=2",true);
+        xmlhttp.send();
+}
+</script>
+<body>
+<button onclick="aaa()">asdf</button>
+<div class="switch switch-large">
+    <input id="ooo" type="checkbox" onclick="aaa()" checked/>
+</div>
+</body>
+</html>

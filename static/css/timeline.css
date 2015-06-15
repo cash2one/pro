@@ -12,7 +12,7 @@
     background: currentColor;
     top: 0px;
     bottom: 0px;
-    margin-left: 30px;
+    margin-left: 10px;
 }
 
 .timeline .separator {
@@ -40,7 +40,7 @@
 
 .timeline .panel {
     position: relative;
-    margin: 10px 0px 0px 70px;
+    margin: 10px 0px 0px 50px;
     clear: both;
 }
 

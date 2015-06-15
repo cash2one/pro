@@ -1,0 +1,120 @@
+$def with(str)
+
+
+
+<!DOCTYPE html>
+
+<html>
+
+<head lang="en">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>历史项目</title>
+
+    <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <link type="text/css" href="../static/css/bootstrap-switch.min.css" rel="stylesheet"/>
+
+    <link type="text/css" href="../static/css/highlight.css" rel="stylesheet"/>
+
+    <link type="text/css" href="../static/css/boxmaterialdesign.css" rel="stylesheet"/>
+
+    <script src="../static/js/jquery.min.js"></script>
+
+    <script src="../static/js/bootstrap.min.js"></script>
+
+    <script src="../static/js/bootstrap-switch.js"></script>
+
+    <script src="../static/js/main.js"></script>
+
+    <script src="../static/js/highlight.js"></script>
+
+    <style>
+        body{
+            padding-top: 0px;
+        }
+    </style>
+
+
+</head>
+
+<script>
+
+    function attention(workflowid){
+
+        bz=document.getElementById(workflowid).checked;
+
+        xmlhttp=new XMLHttpRequest();
+
+        xmlhttp.open("GET","attontion",true);
+
+        xmlhttp.send();
+
+        xmlhttp.open("GET","attontion?workflowid="+workflowid+"&attontion="+bz,true);
+
+        xmlhttp.send();
+
+    }
+
+</script>
+
+<body>
+
+<div class="container">
+
+    <div class="row">
+
+        $for data in str:
+
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+
+            <div class="box">
+
+                <div class="info">
+
+                    <h5 class="text-center btn-primary btn-lg btn-block">
+
+                        <p onclick="parent.location='/workflowdetail?workflowid=$data[0]'">$data[1]</p>
+
+                    </h5>
+
+                    <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>更新时间：$data[2]</small></p>
+
+                    <p style="color: #000000">开始时间：$data[3]</p>
+
+                    <p style="color: #000000">项目描述：$data[4]</p>
+
+                    <p style="color: #000000">参与人员：$data[7]</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <br>
+
+    <br>
+
+    <br>
+
+    <br>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+</body>
+
+</html>

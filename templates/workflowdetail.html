@@ -47,13 +47,13 @@ $def with(str,workflowid,workflowname,hidden,state)
             <div class="panel-heading icon">
                 <i class="glyphicon glyphicon-pencil"></i>
             </div>
-            <a href="#" onclick="parent.location='/addsteppage?workflowid=$workflowid'"><h4>新增内容<br></h4></a>
+            <a href="#" onclick="parent.location='/addsteppage?workflowid=$workflowid'"><h4>新增项目进展<br></h4></a>
         </article>
         <article class="panel panel-info panel-outline">
             <div class="panel-heading icon">
                 <i class="glyphicon glyphicon-share-alt"></i>
             </div>
-            <a href="#" onclick="parent.location='/addsubworkflow?workflowid=$workflowid'"><h4>新增流程<br><br></bz></BZ></h4></a>
+            <a href="#" onclick="parent.location='/addsubworkflow?workflowid=$workflowid'"><h4>新增分支项目<br><br></bz></BZ></h4></a>
         </article>
 
         $for line in str:

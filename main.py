@@ -16,11 +16,23 @@ import thread
 
 # DEBUG Options
 import logging
+from logging.handlers import RotatingFileHandler
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s" \
-                    "  [%(module)s:%(funcName)s:%(lineno)d]\n" \
-                     "%(message)s \n")
+#log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
+#logFile = './log/log'
+#my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024, backupCount=2, encoding=None, delay=0)
+#my_handler.setFormatter(log_formatter)
+#my_handler.setLevel(logging.INFO)
+#app_log = logging.getLogger('yanzhe')
+#app_log.setLevel(logging.INFO)
+#app_log.addHandler(my_handler)
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG, \
+                    format="%(asctime)s" "[%(module)s:%(funcName)s:%(lineno)d]\n" "%(message)s \n" \
+                   )
+# filename='./log/loggmsg.log'
 global Access_token
 name = "postgres"
 password = "1234"
@@ -105,14 +117,14 @@ def RefreshAccessToken(threadName, delay):
         result = json.loads(resp.read())
         if ('access_token' in result.keys()):
             Access_token = result['access_token']
-            logging.debug("Refresh Access Token = |%r|" %Access_token)
+            logging.info("Refresh Access Token = |%r|" %Access_token)
             time.sleep(delay - 1)
 
 # Create one thread to refresh access token as follows
 try:
    thread.start_new_thread( RefreshAccessToken, ("Refresh-Access-Token-Thread", AccessTokenExpireDuration) )
 except:
-   logging.debug( "Error: unable to start Refresh access token thread")
+   logging.info( "Error: unable to start Refresh access token thread")
 
 
 wxcpt = WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
@@ -187,9 +199,9 @@ def LoadWFTdetails(workflowid, userid, username,stateOC):
                 workflowdata=workflow.get(workflow.id==workflowtreedata.subworkflowid)
                #if (FindList(list,str(workflowtreedata.subworkflowid)) and workflowdata.state!='关闭'):
                 if (FindList(list,str(workflowtreedata.subworkflowid))):
-                    details='<a onclick=\"parent.location=\'/workflowdetail?workflowid='+str(workflowtreedata.subworkflowid)+'\'\">'+'<i class=\"glyphicon glyphicon-list\"></i>'+workflowtreedata.details+'</a>'
+                    details='<a onclick=\"parent.location=\'/workflowdetail?workflowid='+str(workflowtreedata.subworkflowid)+'\'\">'+'<i class=\"glyphicon glyphicon-list\"></i> 项目分支：'+workflowtreedata.details+'</a>'
                 else:
-                    details='<i class=\"glyphicon glyphicon-list\"></i>'+workflowtreedata.details
+                    details='<i class=\"glyphicon glyphicon-list\"></i> 项目分支：'+workflowtreedata.details
             line=[date1, details, workflowtreedata.username,change]
             dataline.append(line)
     if (xb==0):
@@ -287,10 +299,6 @@ def GetOption(workflowid,departments,userid):
                         if (FindList(list,str(workflowid)) and userid!=value['userid']):
                             line='<option selected>' + value['userid'] + '-' + value['name'] + '</option>'
                     options += line
-
-
-
-
     return options
 
 
@@ -341,12 +349,14 @@ urls = (
 class clostworkflow:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('stateOC')):
             userid=cookies.userid
             stateOC=cookies.stateOC
         else:
             return render.closepage()
         i=web.input()
+        logging.info("web.input data: |%r|" % i)
         workflowdata=workflow.get(workflow.id==i.workflowid)
         workflowdata.state='关闭'
         workflowdata.save()
@@ -356,12 +366,14 @@ class clostworkflow:
 class addsubworkflow:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('department')):
             userid=cookies.userid
             departments=cookies.department
         else:
             return render.closepage()
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         return render.addworkflowpage(GetOption(0,departments,userid),i.workflowid)
 class Help:
     def GET(self):
@@ -369,11 +381,13 @@ class Help:
 class Attontion:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid')):
             userid=cookies.userid
         else:
             return render.closepage()
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         if (i.attontion == 'true'):
             userlistdata = userlist.get(userlist.userid == userid)
             userlistdata.looker = AddList(userlistdata.looker, str(i.workflowid))
@@ -393,6 +407,7 @@ class Attontion:
 class WeekWorkpage:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('username')):
             userid=cookies.userid
             username=cookies.username
@@ -402,11 +417,13 @@ class WeekWorkpage:
 
     def POST(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid')):
             userid=cookies.userid
         else:
             return render.closepage()
         i = web.input(data=[])
+        logging.info("web.input data: |%r|" % i)
         begin1 = i.data[2]
         begin2 = time.strptime(begin1, '%Y-%m-%d')
         begin = datetime.date(*begin2[:3])
@@ -429,10 +446,12 @@ class WeekWorkpage:
 class AddSteppage:
     def GET(self):
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         return render.addsteppage(i.workflowid)
 
     def POST(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('username') and cookies.get('stateOC')):
             userid=cookies.userid
             username=cookies.username
@@ -442,6 +461,7 @@ class AddSteppage:
 
         global Access_token
         i = web.input(data=[])
+        logging.info("web.input data: |%r|" % i)
         nowtime = time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
         workflowdata = workflow.get(workflow.id == i.data[3])
 
@@ -521,12 +541,14 @@ class AddSteppage:
 class Steppage:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('department')):
             userid=cookies.userid
             departments=cookies.department
         else:
             return render.closepage()
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         workflowdata=workflow.get(workflow.id==i.workflowid)
         workflowtree._meta.db_table = workflowdata.workflowtreename
         workflowtreedate=workflowtree.get(workflowtree.id==i.workflowtreeid)
@@ -542,6 +564,7 @@ class Steppage:
 class WorkflowDetail:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('username') and cookies.get('stateOC')):
             userid=cookies.userid
             username=cookies.username
@@ -549,6 +572,7 @@ class WorkflowDetail:
         else:
             return render.closepage()
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         workflowdata = workflow.get(workflow.id == i.workflowid)
         if (stateOC=='open'):
             if (workflowdata.userid==userid):
@@ -563,19 +587,23 @@ class WorkflowDetail:
 class CheckWorkflow:
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('stateOC')):
             userid=cookies.userid
             stateOC=cookies.stateOC
         else:
             return render.closepage()
-        return render.checkworkflow(LoadWFdetails(userid,stateOC))
+        if (stateOC=='close'):
+            return render.checkcloseflow(LoadWFdetails(userid,stateOC))
+        else:
+            return render.checkworkflow(LoadWFdetails(userid,stateOC))
 
 
 class AddWorkflow:
     #增加工作流
     def POST(self):
         cookies = web.cookies()
-
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('username') and cookies.get('stateOC')):
             userid=cookies.userid
             username=cookies.username
@@ -584,6 +612,7 @@ class AddWorkflow:
             return render.closepage()
 
         i = web.input(data=[])
+        logging.info("web.input data: |%r|" % i)
         workflowdata = workflow()
         nowtime = time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
         nowtimetable = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
@@ -654,12 +683,14 @@ class AddWorkflow:
     #跳转至增加工作流页面
     def GET(self):
         cookies = web.cookies()
+        logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('department')):
             userid=cookies.userid
             departments=cookies.department
         else:
             return render.closepage()
         i = web.input()
+        logging.info("web.input data: |%r|" % i)
         return render.addworkflowpage(GetOption(0,departments,userid),i.workflowid)
 
 #首页内容
@@ -669,8 +700,7 @@ class Syspage:
 
         #Wechat transfer the data to the server
         dataFromWeXin = web.input()
-
-        logging.debug("WeXin Send = |%s|" % dataFromWeXin)
+        logging.info("WeXin Send = |%s|" % dataFromWeXin)
 
         userid=''
         username=''
@@ -684,12 +714,12 @@ class Syspage:
             url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=' \
                   + Access_token + '&code=' + code + '&agentid=0'
 
-            logging.debug("We Send URL= |%s|" % url)
+            logging.info("We Send URL= |%s|" % url)
 
             resp = urllib2.urlopen(url)
             result = json.loads(resp.read())
 
-            logging.debug('WeXin Response = |%s|' % result)
+            logging.info('WeXin Response = |%s|' % result)
             if (result.has_key('UserId')):
                 userid = result['UserId']
                 url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=' \
@@ -697,8 +727,8 @@ class Syspage:
                 resp = urllib2.urlopen(url)
                 result = json.loads(resp.read())
 
-                logging.debug("We send URL = |%s|" % url)
-                logging.debug("WeXin response = |%s|" % result)
+                logging.info("We send URL = |%s|" % url)
+                logging.info("WeXin response = |%s|" % result)
 
                 username = result['name']
 
@@ -733,9 +763,8 @@ class Syspage:
         for value in result['userlist']:
             try:
                 employeeList = userlist.get(userlist.userid == value['userid'])
-                #logging.debug("employeeList = |%r|" % employeeList)
-
             except DoesNotExist:
+                logging.info("add employeeList = |%s|" % userid)
                 employeeList = userlist()
                 employeeList.userid = value['userid']
                 employeeList.list = ''
@@ -743,16 +772,17 @@ class Syspage:
                 employeeList.remark = ''
                 employeeList.save()
         employeeList = userlist.get(userlist.userid == userid)
-        logging.debug("userID = |%s|, userName = |%s|" % (userid, username))
-
+        logging.info("userID = |%s|,userName = |%s| ,position = |%s|,department = |%s|,stateOC = |%s|" % (userid,username,position,department,stateOC))
         if (position=='领导'):
             for departmentid in department:
                 try:
                     departmentList = userlist.get(userlist.userid == str(departmentid))
                     if (not departmentList.list.strip()==''):
+                        logging.info("department=|%s|,list=|%s|" % (departmentid,departmentList.list))
                         list = departmentList.list.split(';')
                         for id in list:
                             employeeList.list=AddList(employeeList.list,id)
+                    logging.info("after add department's list,userID=|%s|,list=|%s|" % (userid,employeeList.list))
                     employeeList.save()
                 except DoesNotExist:
                     departmentList = userlist()
@@ -761,7 +791,6 @@ class Syspage:
                     departmentList.looker = ''
                     departmentList.remark = ''
                     departmentList.save()
-        cookies = web.cookies()
         if (stateOC=='close'):
             return render.checkcloseflow(LoadWFdetails(userid,stateOC))
         else:
@@ -777,21 +806,21 @@ class Index:
         sVerifyEchoStr = i.echostr
         ret, sEchoStr = wxcpt.VerifyURL(sVerifyMsgSig, sVerifyTimeStamp, sVerifyNonce, sVerifyEchoStr)
         if (ret != 0):
-            print "ERR: VerifyURL ret: " + str(ret)
-        print sEchoStr
+            logging.info("ERR: VerifyURL ret: |%r|" % ret)
+        logging.info(sEchoStr)
         return sEchoStr
 
     #平台互动
     def POST(self):
         dataFromWeXin = web.input()
-        logging.debug("WeXin send = |%r|" % dataFromWeXin)
+        logging.info("WeXin send = |%r|" % dataFromWeXin)
 
         sReqData = web.data()
         sReqMsgSig = dataFromWeXin.msg_signature
         sReqTimeStamp = dataFromWeXin.timestamp
         sReqNonce = dataFromWeXin.nonce
         ret, sMsg = wxcpt.DecryptMsg(sReqData, sReqMsgSig, sReqTimeStamp, sReqNonce)
-        logging.debug("XML Message = |%s|" % sMsg)
+        logging.info("XML Message = |%s|" % sMsg)
 
         global Access_token
         xml = etree.fromstring(sMsg)

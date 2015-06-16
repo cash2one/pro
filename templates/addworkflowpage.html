@@ -44,6 +44,9 @@ $def with(str,workflowid)
 </script>
 <script type="text/javascript">
     function disable_btn(){
+       if (document.getElementById("projectname").value.length<1){
+            document.getElementById("projectname").value='未命名项目';
+        }
         document.getElementById("workflowid").value = '$workflowid';
         document.getElementById("submit_id").disabled = 'true';
         document.getElementById("form_id").submit();
@@ -68,7 +71,7 @@ $def with(str,workflowid)
     <form id="form_id" method="post" action="addworkflow">
         <div data-role="page" id="main">
             <div class="ui-content" role="main">
-                <input class="form-control" type="text" name="data" value=""  class="input-xlarge" pattern=".*" placeholder="项目名称" required>
+                <input id="projectname" class="form-control" type="text" name="data" value=""  class="input-xlarge" pattern=".*" placeholder="项目名称" required>
                 <div class="ui-field-contain">
                     <input name="data" type="text" data-role="datebox" data-options='{"mode": "datebox", "useLang":"zh-CN"}' id="lang2" />
                 </div>
@@ -88,6 +91,10 @@ $def with(str,workflowid)
             </div>
         </div>
     </form>
+
+
+
+
 </div>
 
 

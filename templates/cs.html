@@ -4,30 +4,33 @@
     <meta charset="UTF-8">
     <title></title>
     <link type="text/css" href="../static/css/bootstrap.min.css" rel="stylesheet"/>
-    <link type="text/css" href="../static/css/timeline.css" rel="stylesheet"/>
-    <link type="text/css" href="../static/css/bootstrap-switch.min.css" rel="stylesheet"/>
-    <link type="text/css" href="../static/css/highlight.css" rel="stylesheet"/>
 
     <script src="../static/js/jquery-2.1.1.min.js"></script>
     <script src="../static/js/bootstrap.min.js"></script>
-    <script src="../static/js/bootstrap-switch.js"></script>
-    <script src="../static/js/main.js"></script>
-    <script src="../static/js/highlight.js"></script>
 </head>
-<script>
-    function ooo(p) {
-        alert(document.getElementById("aaa").checked)
-        document.getElementById("bbb").value ="asdf";
-    }
-</script>
 <body>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+    Launch demo modal
+</button>
 
-
-<div class="switch switch-large">
-        <input id="aaa" type="checkbox" onchange="ooo('1')"/>
-        <input id="bbb" type="text"/>
-        <button onclick="" style="text-decoration:underline">aaa</button>
-        <a href="#" style="text-decoration:underline">asfdsf</a>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
     </div>
+</div>
 </body>
 </html>

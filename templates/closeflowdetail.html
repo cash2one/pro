@@ -33,17 +33,14 @@ $def with(str,workflowname)
                 </div>
                 <div id="$line[1]" class="panel-collapse collapse $line[2]">
                     $for data in line[0]:
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <pre>$:data[1] $:data[3]</pre>
-                                <small>
-                                    <div class="row">
-                                        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 text-left" >$data[2] $data[0]</div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-right">$:data[3]</div>
-                                    </div>
-                                </small>
-                            </li>
-                        </ul>
+                        <li class="list-group-item">
+                            <pre>$:data[1]</pre>
+                            <small>
+                                <div class="row">
+                                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 text-left" >$data[2] $data[0]</div>
+                                </div>
+                            </small>
+                        </li>
                 </div>
             </article>
     </div>

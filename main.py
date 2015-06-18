@@ -1,5 +1,7 @@
 ﻿#!/usr/bin/python
 # encoding=utf-8
+import base64
+
 import time, datetime
 import web
 import urllib2, urllib
@@ -11,6 +13,7 @@ from WXBizMsgCrypt import WXBizMsgCrypt
 from peewee import *
 from peewee import Expression
 import string
+
 # Thread
 import thread
 
@@ -27,12 +30,13 @@ from logging.handlers import RotatingFileHandler
 #app_log.setLevel(logging.INFO)
 #app_log.addHandler(my_handler)
 
+
 import logging
 
 logging.basicConfig(level=logging.DEBUG, \
                     format="%(asctime)s" "[%(module)s:%(funcName)s:%(lineno)d]\n" "%(message)s \n" \
+                   # ,filename='./log/loggmsg.log'
                    )
-# filename='./log/loggmsg.log'
 global Access_token
 name = "postgres"
 password = "1234"
@@ -53,15 +57,16 @@ class workflow(BaseModel):
     userid = CharField()
     username = CharField()
     fatherid=IntegerField()
-    state=CharField()
-    flowname = CharField()
+    state=TextField()
+    flowname = TextField()
     flowdate = DateField()
-    flowdetails = CharField()
-    workflowtreename = CharField()
+    flowdetails = TextField()
+    workflowtreename = TextField()
     updatetime = DateTimeField()
     writetime = DateTimeField()
-    looker = CharField()
-    remark = CharField()
+    tinyurl=CharField()
+    looker = TextField()
+    remark = TextField()
 
 
 class workflowtree(BaseModel):
@@ -69,35 +74,25 @@ class workflowtree(BaseModel):
     userid = CharField()
     username = CharField()
     date = DateField()
-    details = CharField()
+    details = TextField()
     subworkflowid = IntegerField()
     writetime = DateTimeField()
-    transmit = CharField()
-    state=CharField()
-    remark = CharField()
+    transmit = TextField()
+    state=TextField()
+    remark = TextField()
 
 
 class userlist(BaseModel):
     userid = CharField()
-    list = CharField()
-    looker = CharField()
-    remark = CharField()
-
-
-class jobcontent(BaseModel):
-    date = DateField()
-    userid = CharField()
-    content = CharField()
-    writetime = DateTimeField()
-    remark = CharField()
+    list = TextField()
+    looker = TextField()
+    remark = TextField()
 
 
 if (not workflow.table_exists()):
     workflow.create_table()
 if (not userlist.table_exists()):
     userlist.create_table()
-if (not jobcontent.table_exists()):
-    jobcontent.create_table()
 
 sToken = 'project'
 sEncodingAESKey = 'PId9elWI4D1E1uVv4MCjzKdNBmPn9BWfnRqJoYuJz2X'
@@ -130,39 +125,22 @@ except:
 wxcpt = WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 render = web.template.render('templates')
 
-
-def FindList(list, str2):
-    bz = 0;
-    for j in list:
-        if (j == str2):
-            bz = 1;
-    return bz
-
-
 def DelList(str1, str2):
     if (str1.strip() == ''):
         return ''
-    list = str1.split(';')
-    if (FindList(list, str2)):
+    list = set(str1.split(';'))
+    if (str2 in list):
         list.remove(str2)
     return ';'.join(list)
-
 
 def AddList(str1, str2):
     if (str1.strip() == ''):
         return str2
-    list = str1.split(';')
-    if (FindList(list, str2)):
-        str = str1
-    else:
-        list.append(str2)
-        str = ';'.join(list)
-    return str
-
-
+    list = set(str1.split(';'))
+    list.add(str2)
+    return ';'.join(list)
 
 def LoadWFTdetails(workflowid, userid, username,stateOC):
-
     dataline=[]
     sumline=[]
     datetitle=''
@@ -190,15 +168,14 @@ def LoadWFTdetails(workflowid, userid, username,stateOC):
             if (workflowtreedata.userid == userid and workflowtreedata.subworkflowid==0 and stateOC=='open'):
                 change = '<a class=\"btn btn-mini navbar-right\" href=\"#\" onclick=\"parent.location=\'/steppage?workflowtreeid=' + str(
                     workflowtreedata.id) + '&workflowid=' + str(workflowtreedata.workflowid) + '&date=' + str(
-                    workflowtreedata.date) + '&details=' + workflowtreedata.details + '\'\"><small>>>修改</small></a>'
+                    workflowtreedata.date) +'\'\"><small>>>修改</small></a>'
             else:
                 change = ''
             if (workflowtreedata.subworkflowid!=0):
                 user=userlist.get(userlist.userid == userid)
-                list=user.list.split(';')
+                lists=set(user.list.split(';'))
                 workflowdata=workflow.get(workflow.id==workflowtreedata.subworkflowid)
-               #if (FindList(list,str(workflowtreedata.subworkflowid)) and workflowdata.state!='关闭'):
-                if (FindList(list,str(workflowtreedata.subworkflowid))):
+                if (str(workflowtreedata.subworkflowid) in lists):
                     details='<a onclick=\"parent.location=\'/workflowdetail?workflowid='+str(workflowtreedata.subworkflowid)+'\'\">'+'<i class=\"glyphicon glyphicon-list\"></i> 项目分支：'+workflowtreedata.details+'</a>'
                 else:
                     details='<i class=\"glyphicon glyphicon-list\"></i> 项目分支：'+workflowtreedata.details
@@ -215,45 +192,32 @@ def LoadWFdetails(userid,stateOC):
     dataline=[]
     userlistdata = userlist.get(userlist.userid == userid)
     if (not userlistdata.list.strip() == ''):
-        list = userlistdata.list.split(';')
-        if (not userlistdata.looker.strip() == ''):
-            looker = userlistdata.looker.split(';')
-        else:
-            looker = ''
-        for workflowdata in workflow().select().where(workflow.id << list).order_by(workflow.updatetime.desc()):
+        lists = userlistdata.list.split(';')
+        for workflowdata in workflow().select().where(workflow.id << lists).order_by(workflow.updatetime.desc()):
             check=''
-            if (not userlistdata.looker.strip() == ''):
-                if (FindList(looker, str(workflowdata.id))):
-                    check = 'checked'
+            if (str(workflowdata.id) in set(lists)):
+                check = 'checked'
             workflowtree._meta.db_table = workflowdata.workflowtreename
             participants=''
             for participant in workflowtree().select(workflowtree.username).distinct():
                 participants+=participant.username+' '
             line=[workflowdata.id,workflowdata.flowname,workflowdata.updatetime,workflowdata.flowdate,workflowdata.flowdetails,workflowdata.id,check,participants]
-            if (stateOC=='open' and workflowdata.state!='关闭'):
+            if (stateOC=='open' and workflowdata.state!='close'):
                 dataline.append(line)
-            if (stateOC=='close' and workflowdata.state=='关闭'):
+            if (stateOC=='close' and workflowdata.state=='close'):
                 dataline.append(line)
     return dataline
 
 def Post(url, data):
     req = urllib2.Request(url, data);
     response = urllib2.urlopen(req);
-
+    result = json.loads(response.read())
+    return result
 def Transmit(wft, sendee, time,userid):
     global Access_token
     if (not sendee.strip() == ''):
-        bz=0
-        if (wft.transmit.strip() == ''):
-            wft.transmit = sendee
-            bz=1
-        else:
-            list=wft.transmit.split(';')
-            if (not FindList(list,sendee)):
-                wft.transmit += ';' + sendee
-                bz=1
         user = sendee.split('-')
-        if (bz and user[0]!=userid):
+        if (user[0]!=userid):
             try:
                 employeeList = userlist.get(userlist.userid == user[0])
                 employeeList.list = AddList(employeeList.list, str(wft.workflowid))
@@ -268,8 +232,7 @@ def Transmit(wft, sendee, time,userid):
                 employeeList.save()
 
             wf = workflow.get(workflow.id == wft.workflowid)
-            content = wft.username + '：项目《' + wf.flowname + '》组邀请您加入。'
-
+            content = wft.username + '：项目《' + wf.flowname + '》组邀请您加入。\n'+wf.tinyurl
             url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + Access_token + '&debug=1'
             data = '{\"touser\":\"' + str(
                 user[0]) + '\",\"msgtype\":\"text\",\"agentid\":\"0\",\"text\":{\"content\": \"' + str(
@@ -284,7 +247,7 @@ def GetOption(workflowid,departments,userid):
     resp = urllib2.urlopen(url)
     result = json.loads(resp.read())
     for department in result['department']:
-        if (FindList(departments,str(department['id']))):
+        if (str(department['id']) in departments):
             options+='<optgroup label=\"'+department['name']+'\"></optgroup>'
             url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=' + Access_token + '&department_id='+str(department['id'])+'&fetch_child=1&status=0';
             resp = urllib2.urlopen(url)
@@ -295,19 +258,11 @@ def GetOption(workflowid,departments,userid):
                     if (not workflowid==0):
                         employeeList = userlist.get(userlist.userid==value['userid'])
                         user=employeeList.get(userlist.userid==value['userid'])
-                        list=user.list.split(';')
-                        if (FindList(list,str(workflowid)) and userid!=value['userid']):
+                        lists=set(user.list.split(';'))
+                        if ((str(workflowid) in lists) and userid!=value['userid']):
                             line='<option selected>' + value['userid'] + '-' + value['name'] + '</option>'
                     options += line
     return options
-
-
-def WORKCONTENT(userid):
-    s = ''
-    for jobcontent1 in jobcontent().select().where(jobcontent.userid == userid):
-        s += '<tr><th>' + str(jobcontent1.date) + '</th><th>' + jobcontent1.content + '</th></tr>'
-    return s
-
 
 def AddDepartment(userid,workflowid):
     global Access_token
@@ -327,7 +282,19 @@ def AddDepartment(userid,workflowid):
             departmentList.looker = ''
             departmentList.remark = ''
             departmentList.save()
-
+def Clostwf(workflowid):
+    detail=''
+    for subworkflow in workflow().select().where(workflow.fatherid==workflowid):
+        if (subworkflow.state=='open'):
+            if (detail.strip()==''):
+                detail='《'+subworkflow.flowname+'》'
+            else:
+                detail+='，《'+subworkflow.flowname+'》'
+    if (detail.strip()==''):
+        detail='将被终止？'
+    else:
+        detail='无法终止。<blockquote><p><small>子项目'+detail+'尚未终止。</small></p></blockquote>'
+    return detail
 urls = (
     '/', 'Index',
     '/sys', 'Syspage',
@@ -339,8 +306,6 @@ urls = (
     '/addsteppage', 'AddSteppage',
     '/changestep', 'AddSteppage',
     '/addstep', 'AddSteppage',
-    '/weekworkpage', 'WeekWorkpage',
-    '/addwork', 'WeekWorkpage',
     '/attontion', 'Attontion',
     '/help','Help',
     '/addsubworkflow','addsubworkflow',
@@ -352,16 +317,33 @@ class clostworkflow:
         logging.info("cookies data: |%r|" % cookies)
         if (cookies.get('userid') and cookies.get('stateOC')):
             userid=cookies.userid
+            username=cookies.username
             stateOC=cookies.stateOC
         else:
             return render.closepage()
         i=web.input()
         logging.info("web.input data: |%r|" % i)
-        workflowdata=workflow.get(workflow.id==i.workflowid)
-        workflowdata.state='关闭'
-        workflowdata.save()
-        return render.checkworkflow(LoadWFdetails(userid,stateOC))
+        bz=1
+        for subworkflow in workflow().select().where(workflow.fatherid==i.workflowid):
+            if (subworkflow.state=='open'):
+                bz=0
+                break
+        if (bz):
+            workflowdata=workflow.get(workflow.id==i.workflowid)
+            workflowdata.state='close'
+            workflowdata.save()
+            if (not workflowdata.looker.strip() == ''):
+                lists = workflowdata.looker.split(';')
+                for everyone in lists:
+                    if (not userid == everyone):
+                        content=username+'：项目《' +workflowdata.flowname + '》已关闭\n'+workflowdata.tinyurl
 
+                        url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + Access_token + '&debug=1'
+                        data = '{\"touser\":\"' + str(
+                            everyone) + '\",\"msgtype\":\"text\",\"agentid\":\"0\",\"text\":{\"content\": \"' + str(
+                            content) + '\"},\"safe\":\"0\"}'
+                        Post(url, data)
+        return render.checkworkflow(LoadWFdetails(userid,stateOC))
 
 class addsubworkflow:
     def GET(self):
@@ -402,44 +384,6 @@ class Attontion:
             workflowdata = workflow.get(workflow.id == i.workflowid)
             workflowdata.looker = DelList(workflowdata.looker, str(userid))
             workflowdata.save()
-
-
-class WeekWorkpage:
-    def GET(self):
-        cookies = web.cookies()
-        logging.info("cookies data: |%r|" % cookies)
-        if (cookies.get('userid') and cookies.get('username')):
-            userid=cookies.userid
-            username=cookies.username
-        else:
-            return render.closepage()
-        return render.weekwork(userid, username, WORKCONTENT(userid))
-
-    def POST(self):
-        cookies = web.cookies()
-        logging.info("cookies data: |%r|" % cookies)
-        if (cookies.get('userid')):
-            userid=cookies.userid
-        else:
-            return render.closepage()
-        i = web.input(data=[])
-        logging.info("web.input data: |%r|" % i)
-        begin1 = i.data[2]
-        begin2 = time.strptime(begin1, '%Y-%m-%d')
-        begin = datetime.date(*begin2[:3])
-        end1 = i.data[3]
-        end2 = time.strptime(end1, '%Y-%m-%d')
-        end = datetime.date(*end2[:3])
-        for j in range((end - begin).days + 1):
-            day = begin + datetime.timedelta(days=j)
-            jobcontent1 = jobcontent()
-            jobcontent1.date = day
-            jobcontent1.userid = i.data[0]
-            jobcontent1.content = i.data[4]
-            jobcontent1.writetime = time.strftime('%Y-%m-%d %X', time.localtime(time.time()))
-            jobcontent1.remark = ''
-            jobcontent1.save()
-        return render.weekwork(i.data[0], i.data[1], WORKCONTENT(i.data[0]))
 
 
 #某一工作流具体步骤
@@ -505,9 +449,14 @@ class AddSteppage:
             newlist=list(set(k.option))
             addlist=list(set(newlist).difference(set(oldlist)))
             dellist=list(set(oldlist).difference(set(newlist)))
+            print newlist
+            print oldlist
+            print addlist
+            print dellist
+            print 'aaaaaaaaaaaaa'
+            print 'aaaaaaaaaaaaa'
             for sendee in dellist:
                 if (sendee.strip()!=''):
-
                     workflowdata.looker = DelList(workflowdata.looker,sendee.split('-')[0])
                     user=userlist.get(userlist.userid==sendee.split('-')[0])
                     user.list=DelList(user.list,str(i.data[3]))
@@ -518,13 +467,14 @@ class AddSteppage:
                 workflowdata.looker = AddList(workflowdata.looker, sendee.split('-')[0])
                 Transmit(workflowtreedata,sendee, nowtime,userid)
                 AddDepartment(sendee.split('-')[0],str(i.data[3]))
+        workflowtreedata.transmit=';'.join(newlist)
         workflowtreedata.save()
 
         if (not workflowdata.looker.strip() == ''):
             lists = workflowdata.looker.split(';')
             for everyone in lists:
                 if (not userid == everyone):
-                    content=username+'：项目《' +workflowdata.flowname + '》进展为「' + i.data[2] + '」'
+                    content=username+'：项目《' +workflowdata.flowname + '》进展为「' + i.data[2] + '」'+'\n'+workflowdata.tinyurl
 
                     url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + Access_token + '&debug=1'
                     data = '{\"touser\":\"' + str(
@@ -535,7 +485,7 @@ class AddSteppage:
             hidden='btn-danger'
         else:
             hidden='hidden'
-        return render.workflowdetail(LoadWFTdetails(i.data[3], userid, username,stateOC),i.data[3], workflowdata.flowname,hidden,workflowdata.state)
+        return render.workflowdetail(LoadWFTdetails(i.data[3], userid, username,stateOC),i.data[3], workflowdata.flowname,hidden,workflowdata.state,Clostwf(i.data[3]))
 
 
 class Steppage:
@@ -556,8 +506,7 @@ class Steppage:
             choicepotion=''
         else:
             choicepotion='hidden=\"true\"'
-
-        return render.steppage(GetOption(i.workflowid,departments,userid),choicepotion,i.workflowid, i.workflowtreeid, i.date, i.details)
+        return render.steppage(GetOption(i.workflowid,departments,userid),choicepotion,i.workflowid, i.workflowtreeid, i.date, urllib.quote(str(workflowtreedate.details)))
 
 
 #某一工作流详细内容
@@ -572,14 +521,17 @@ class WorkflowDetail:
         else:
             return render.closepage()
         i = web.input()
+        userlistdata=userlist.get(userlist.userid==userid)
+        if (str(i.workflowid) not in set(userlistdata.list.split(';'))):
+            return render.closepage()
         logging.info("web.input data: |%r|" % i)
         workflowdata = workflow.get(workflow.id == i.workflowid)
-        if (stateOC=='open'):
+        if (stateOC=='open'and workflowdata.state=='open'):
             if (workflowdata.userid==userid):
                 hidden='btn-danger'
             else:
                 hidden='hidden'
-            return render.workflowdetail(LoadWFTdetails(i.workflowid, userid,username,stateOC),i.workflowid,workflowdata.flowname,hidden,workflowdata.state)
+            return render.workflowdetail(LoadWFTdetails(i.workflowid, userid,username,stateOC),i.workflowid,workflowdata.flowname,hidden,workflowdata.state,Clostwf(i.workflowid))
         else:
             return render.closeflowdetail(LoadWFTdetails(i.workflowid, userid,username,stateOC),workflowdata.flowname)
 
@@ -618,7 +570,7 @@ class AddWorkflow:
         nowtimetable = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
         workflowdata.userid = userid
         workflowdata.username = username
-        workflowdata.state='打开'
+        workflowdata.state='open'
         workflowdata.flowname = i.data[0]
         workflowdata.flowdate = i.data[1]
         workflowdata.flowdetails = i.data[2]
@@ -629,9 +581,22 @@ class AddWorkflow:
         tablename = str(nowtimetable) + '_' + userid
         workflowdata.workflowtreename = tablename
         workflowdata.fatherid=i.data[3]
+        workflowdata.tinyurl=''
         workflowdata.save()
 
         workflowid = db.last_insert_id(db.get_cursor(), workflow)
+        data='https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx0af1900070a3ea37&redirect_uri=http%3a%2f%2f120.25.145.20%3a8080%2fsys&response_type=code&scope=snsapi_base&state='+str(workflowid)+'#wechat_redirect'
+        data=urllib.urlencode({'url':data})
+        url = 'http://dwz.cn/create.php'
+        result = Post(url, data);
+        logging.info("short url result=|%r|" % result)
+        if (result['status']==0):
+            workflowdata.tinyurl=result['tinyurl']
+            logging.info("workflowid=|%r|,short url=|%r|" % (workflowid,workflowdata.tinyurl))
+        else:
+            workflowdata.tinyurl=''
+            logging.error("workflowid=|%r|,short url=|%r|" % (workflowid,'NULL'))
+        workflowdata.save()
         AddDepartment(userid,str(workflowid))
         userlistdata = userlist.get(userlist.userid == userid)
         userlistdata.list = AddList(userlistdata.list, str(workflowid))
@@ -671,7 +636,8 @@ class AddWorkflow:
             detailsWFT.save()
 
         i = web.input(option=[])
-        for option in i.option:
+        workflowdata.transmit=list(set(i.option))
+        for option in workflowdata.transmit:
             workflowdata.looker = AddList(workflowdata.looker,option.split('-')[0])
             Transmit(workflowtreedata, option, nowtime,userid)
             AddDepartment(option.split('-')[0],str(workflowid))
@@ -709,7 +675,16 @@ class Syspage:
         department=''
         if (dataFromWeXin.get('code')):
             code = dataFromWeXin.code
-            stateOC=dataFromWeXin.state
+            page='menu'
+            if (dataFromWeXin.state=='close'):
+                stateOC='close'
+            else:
+                if (dataFromWeXin.state=='open'):
+                    stateOC='open'
+                else:
+                    workflowdata=workflow.get(workflow.id==dataFromWeXin.state)
+                    page='url'
+                    stateOC=workflowdata.state
             web.setcookie('stateOC', stateOC, holdtime)
             url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=' \
                   + Access_token + '&code=' + code + '&agentid=0'
@@ -744,7 +719,7 @@ class Syspage:
                 web.setcookie('userid',userid, holdtime)
                 web.setcookie('username', username, holdtime)
                 web.setcookie('position', position, holdtime)
-                web.setcookie('department', department, holdtime)
+                web.setcookie('department',set(department), holdtime)
 
         if (userid.strip()==''):
             cookies = web.cookies()
@@ -756,17 +731,20 @@ class Syspage:
                 stateOC=cookies.stateOC
             else:
                 return render.closepage()
-
+        newlist=set([])
+        oldlist=set([])
         url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist?access_token=' + Access_token + '&department_id=1&fetch_child=1&status=0';
         resp = urllib2.urlopen(url)
         result = json.loads(resp.read())
-        for value in result['userlist']:
-            try:
-                employeeList = userlist.get(userlist.userid == value['userid'])
-            except DoesNotExist:
-                logging.info("add employeeList = |%s|" % userid)
+        for userinf in result['userlist']:
+            newlist.add(userinf['userid'])
+        for userinf in userlist().select(userlist.userid):
+            oldlist.add(userinf.userid)
+        for user in newlist:
+            if (user not in oldlist):
+                logging.info("add employeeList = |%s|" % user)
                 employeeList = userlist()
-                employeeList.userid = value['userid']
+                employeeList.userid = user
                 employeeList.list = ''
                 employeeList.looker = ''
                 employeeList.remark = ''
@@ -776,7 +754,7 @@ class Syspage:
         if (position=='领导'):
             for departmentid in department:
                 try:
-                    departmentList = userlist.get(userlist.userid == str(departmentid))
+                    departmentList = userlist.get(userlist.userid == departmentid)
                     if (not departmentList.list.strip()==''):
                         logging.info("department=|%s|,list=|%s|" % (departmentid,departmentList.list))
                         list = departmentList.list.split(';')
@@ -791,11 +769,23 @@ class Syspage:
                     departmentList.looker = ''
                     departmentList.remark = ''
                     departmentList.save()
-        if (stateOC=='close'):
-            return render.checkcloseflow(LoadWFdetails(userid,stateOC))
+        if (page=='menu'):
+            if (stateOC=='close'):
+                return render.checkcloseflow(LoadWFdetails(userid,stateOC))
+            else:
+                return render.checkworkflow(LoadWFdetails(userid,stateOC))
         else:
-            return render.checkworkflow(LoadWFdetails(userid,stateOC))
-
+            userlistdata=userlist.get(userlist.userid==userid)
+            if (str(workflowdata.id) not in set(userlistdata.list.split(';'))):
+                return render.closepage()
+            if (stateOC=='close'):
+                return render.closeflowdetail(LoadWFTdetails(workflowdata.id, userid,username,stateOC),workflowdata.flowname)
+            else:
+                if (workflowdata.userid==userid):
+                    hidden='btn-danger'
+                else:
+                    hidden='hidden'
+                return render.workflowdetail(LoadWFTdetails(workflowdata.id, userid,username,stateOC),workflowdata.id,workflowdata.flowname,hidden,workflowdata.state,Clostwf(workflowdata.id))
 class Index:
     #验证接口用
     def GET(self):

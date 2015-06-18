@@ -30,7 +30,7 @@ $def with(str,choicepotion,workflowid,workflowtreeid,date,details)
     <script type="text/javascript" src="http://cdn.jtsage.com/datebox/i18n/jquery.mobile.datebox.i18n.zh-CN.utf8.min.js"></script>
     <style>
         body{
-            padding-top: 50px;
+            padding-top: 100px;
         }
     </style>
 </head>
@@ -39,8 +39,11 @@ $def with(str,choicepotion,workflowid,workflowtreeid,date,details)
         document.getElementById("workflowtreeid").value = '$workflowtreeid';
         document.getElementById("workflowid").value = '$workflowid';
         document.getElementById("lang2").value = '$date';
-        document.getElementById("details").value = '$details';
         document.getElementById("bz").value = 'change';
+//        var d2= decodeURIComponent(window.atob('$details'))
+        document.getElementById("details").value = decodeURIComponent('$details');
+//        document.getElementById("details").click();
+//        window.event.keyCode=13;
     }
 </script>
 <script type="text/javascript">
@@ -51,7 +54,7 @@ $def with(str,choicepotion,workflowid,workflowtreeid,date,details)
     <form id="form_id" method="post" action="changestep">
         <div data-role="page" id="main">
             <div class="ui-content" role="main">
-                <div hidden="true">
+               <div hidden="true">
                     <input id="bz" type="text" name="data"></a>
                 </div>
 
@@ -66,7 +69,7 @@ $def with(str,choicepotion,workflowid,workflowtreeid,date,details)
                     </div>
                 </div>
                 <div class="form-group">
-                    <textarea id="details" class="form-control" name="data" placeholder="详细内容" required autofocus></textarea>
+                    <textarea id="details" class="aaa" name="data" placeholder="详细内容" required autofocus></textarea>
                 </div>
                 <div hidden="true">
                     <input id="workflowid" type="text" name="data">
@@ -74,7 +77,7 @@ $def with(str,choicepotion,workflowid,workflowtreeid,date,details)
                 <div hidden="true">
                     <input id="workflowtreeid" type="text" name="data">
                 </div>
-                <input type="submit" value="提交">
+                <input type="submit" value="提交"/>
             </div>
         </div>
     </form>

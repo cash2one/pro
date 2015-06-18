@@ -195,7 +195,7 @@ def LoadWFdetails(userid,stateOC):
         lists = userlistdata.list.split(';')
         for workflowdata in workflow().select().where(workflow.id << lists).order_by(workflow.updatetime.desc()):
             check=''
-            if (str(workflowdata.id) in set(lists)):
+            if (str(workflowdata.id) in userlistdata.looker.split(';')):
                 check = 'checked'
             workflowtree._meta.db_table = workflowdata.workflowtreename
             participants=''
@@ -240,12 +240,19 @@ def Transmit(wft, sendee, time,userid):
             Post(url, data)
 
 
-def GetOption(workflowid,departments,userid):
+def GetOption(workflowid,departments,userid,personoption):
     global Access_token
     options=''
     url='https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token='+Access_token
     resp = urllib2.urlopen(url)
     result = json.loads(resp.read())
+
+    personlist=set([])
+    if (personoption.strip()!=''):
+        for value in personoption.split(';'):
+            personlist.add(value.split('-')[0])
+    print personlist
+    print 'aaaaaaaaaaaaaa'
     for department in result['department']:
         if (str(department['id']) in departments):
             options+='<optgroup label=\"'+department['name']+'\"></optgroup>'
@@ -255,20 +262,25 @@ def GetOption(workflowid,departments,userid):
             if (result['errcode'] == 0):
                 for value in result['userlist']:
                     line='<option>' + value['userid'] + '-' + value['name'] + '</option>'
-                    if (not workflowid==0):
-                        employeeList = userlist.get(userlist.userid==value['userid'])
-                        user=employeeList.get(userlist.userid==value['userid'])
-                        lists=set(user.list.split(';'))
-                        if ((str(workflowid) in lists) and userid!=value['userid']):
-                            line='<option selected>' + value['userid'] + '-' + value['name'] + '</option>'
+                    if (personoption.strip()!=''):
+                        if (str(value['userid']) in personlist):
+                            employeeList = userlist.get(userlist.userid==value['userid'])
+                            user=employeeList.get(userlist.userid==value['userid'])
+                            lists=set(user.list.split(';'))
+                            if ((str(workflowid) in lists) and userid!=value['userid']):
+                                line='<option selected>' + value['userid'] + '-' + value['name'] + '</option>'
                     options += line
     return options
 
 def AddDepartment(userid,workflowid):
+    print userid
+    print workflowid
+    print 'aaaaaaaaaaaaaa'
     global Access_token
     url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token='+ Access_token + '&userid=' + userid
     resp = urllib2.urlopen(url)
     result = json.loads(resp.read())
+    logging.info("result data: |%r|" % result)
     department = result['department']
     for departmentid in department:
         try:
@@ -308,7 +320,7 @@ urls = (
     '/addstep', 'AddSteppage',
     '/attontion', 'Attontion',
     '/help','Help',
-    '/addsubworkflow','addsubworkflow',
+    '/addsubworkflow','Addsubworkflow',
     '/clostworkflow','clostworkflow')
 
 class clostworkflow:
@@ -345,7 +357,7 @@ class clostworkflow:
                         Post(url, data)
         return render.checkworkflow(LoadWFdetails(userid,stateOC))
 
-class addsubworkflow:
+class Addsubworkflow:
     def GET(self):
         cookies = web.cookies()
         logging.info("cookies data: |%r|" % cookies)
@@ -356,7 +368,7 @@ class addsubworkflow:
             return render.closepage()
         i = web.input()
         logging.info("web.input data: |%r|" % i)
-        return render.addworkflowpage(GetOption(0,departments,userid),i.workflowid)
+        return render.addworkflowpage(GetOption(0,departments,userid,''),i.workflowid)
 class Help:
     def GET(self):
          return render.help()
@@ -440,6 +452,7 @@ class AddSteppage:
             workflowtreedata.state=''
         k = web.input(option=[])
         addlist=k.option
+        newlist=[]
         if (i.data[0]=='change'):
             if (workflowtreedataold.transmit.strip() == ''):
                 oldlist=[]
@@ -449,12 +462,6 @@ class AddSteppage:
             newlist=list(set(k.option))
             addlist=list(set(newlist).difference(set(oldlist)))
             dellist=list(set(oldlist).difference(set(newlist)))
-            print newlist
-            print oldlist
-            print addlist
-            print dellist
-            print 'aaaaaaaaaaaaa'
-            print 'aaaaaaaaaaaaa'
             for sendee in dellist:
                 if (sendee.strip()!=''):
                     workflowdata.looker = DelList(workflowdata.looker,sendee.split('-')[0])
@@ -504,9 +511,11 @@ class Steppage:
         workflowtreedate=workflowtree.get(workflowtree.id==i.workflowtreeid)
         if (workflowtreedate.state=='发起'):
             choicepotion=''
+            personoption=workflowtreedate.transmit
         else:
             choicepotion='hidden=\"true\"'
-        return render.steppage(GetOption(i.workflowid,departments,userid),choicepotion,i.workflowid, i.workflowtreeid, i.date, urllib.quote(str(workflowtreedate.details)))
+            personoption=''
+        return render.steppage(GetOption(i.workflowid,departments,userid,personoption),choicepotion,i.workflowid, i.workflowtreeid, i.date, urllib.quote(str(workflowtreedate.details)))
 
 
 #某一工作流详细内容
@@ -636,8 +645,8 @@ class AddWorkflow:
             detailsWFT.save()
 
         i = web.input(option=[])
-        workflowdata.transmit=list(set(i.option))
-        for option in workflowdata.transmit:
+        workflowtreedata.transmit=';'.join(i.option)
+        for option in i.option:
             workflowdata.looker = AddList(workflowdata.looker,option.split('-')[0])
             Transmit(workflowtreedata, option, nowtime,userid)
             AddDepartment(option.split('-')[0],str(workflowid))
@@ -657,7 +666,7 @@ class AddWorkflow:
             return render.closepage()
         i = web.input()
         logging.info("web.input data: |%r|" % i)
-        return render.addworkflowpage(GetOption(0,departments,userid),i.workflowid)
+        return render.addworkflowpage(GetOption(0,departments,userid,''),i.workflowid)
 
 #首页内容
 class Syspage:

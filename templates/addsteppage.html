@@ -22,6 +22,33 @@ $def with(workflowid)
         }
     </style>
 </head>
+
+<body onload="FillContents()">
+
+<div class="container">
+    <form id="form_id" method="post" action="addstep">
+		<div data-role="page" id="main">
+   		    <div class="ui-content" role="main">
+                <div hidden="true">
+                    <input id="bz" type="text" name="data" hidden></a>
+                </div>
+                <div class="ui-field-contain">
+                    <input name="data" type="text" data-role="datebox" data-options='{"mode": "datebox", "useLang":"zh-CN"}' id="lang2" />
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" name="data" placeholder="详细内容" required autofocus></textarea>
+                </div>
+                <div hidden="true">
+                    <input id="workflowid" type="text" name="data">
+                </div>
+                <input id="submit_id" type="submit" value="提交" onclick="disable_btn()">
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+</body>
+
 <script type="text/javascript">
     jQuery.extend(jQuery.mobile, { ajaxEnabled: false });
 </script>
@@ -49,29 +76,6 @@ $def with(workflowid)
         document.getElementById("form_id").submit();
     }
 </script>
-<body onload="FillContents()">
-
-<div class="container">
-    <form id="form_id" method="post" action="addstep">
-		<div data-role="page" id="main">
-   		    <div class="ui-content" role="main">
-                <div hidden="true">
-                    <input id="bz" type="text" name="data" hidden></a>
-                </div>
-                <div class="ui-field-contain">
-                    <input name="data" type="text" data-role="datebox" data-options='{"mode": "datebox", "useLang":"zh-CN"}' id="lang2" />
-                </div>
-                <div class="form-group">
-                    <textarea class="form-control" name="data" placeholder="详细内容" required autofocus></textarea>
-                </div>
-                <div hidden="true">
-                    <input id="workflowid" type="text" name="data">
-                </div>
-                <input id="submit_id" type="submit" value="提交" onclick="disable_btn()">
-            </div>
-        </div>
-    </form>
-    </div>
-</div>
-</body>
 </html>
+
+

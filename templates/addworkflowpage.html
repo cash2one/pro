@@ -36,39 +36,10 @@ $def with(str,workflowid)
         }
     </style>
 </head>
-<script type="text/javascript">
-    jQuery.extend(jQuery.mobile, { ajaxEnabled: false });
-</script>
-<script type="text/javascript">
-    $('js-example-basic-multiple').select2();
-</script>
-<script type="text/javascript">
-    function disable_btn(){
-       if (document.getElementById("projectname").value.length<1){
-            document.getElementById("projectname").value='未命名项目';
-        }
-        document.getElementById("workflowid").value = '$workflowid';
-        document.getElementById("submit_id").disabled = 'true';
-        document.getElementById("form_id").submit();
-    }
-    function FillContents(){
-        var today = new Date();
-        var year=today.getFullYear().toString()
-        var month=(today.getMonth()+1).toString()
-        var day=today.getDate().toString()
-        if (month.length==1){
-            month='0'+month
-        }
-        if (day.length==1){
-            day='0'+day
-        }
-        document.getElementById("lang2").value = year+'-'+month+'-'+day
-    }
-</script>
-<body onload="FillContents()">
 
+<body onload="FillContents()">
 <div class="container">
-    <form id="form_id" method="post" action="addworkflow">
+    <form id="form_id" method="post" action="addworkflowpage" >
         <div data-role="page" id="main">
             <div class="ui-content" role="main">
                 <input id="projectname" class="form-control" type="text" name="data" value=""  class="input-xlarge" pattern=".*" placeholder="项目名称" required>
@@ -87,16 +58,43 @@ $def with(str,workflowid)
                     <input id="workflowid" type="text" name="data" hidden>
                 </div>
 
-                <input id="" class="btn-danger" type="submit" value="提交" onclick="disable_btn()">
+                <input id="submit_id" type="submit" value="提交" onclick="disable_btn()">
             </div>
         </div>
     </form>
-
-
-
-
 </div>
-
-
 </body>
+
+<script type="text/javascript">
+    jQuery.extend(jQuery.mobile, { ajaxEnabled: false });
+</script>
+<script type="text/javascript">
+    $('js-example-basic-multiple').select2();
+</script>
+<script type="text/javascript">
+    function disable_btn(){
+        if (document.getElementById("projectname").value.length<1)
+        {
+            document.getElementById("projectname").value='未命名项目';
+        }
+        document.getElementById("submit_id").disabled = 'true';
+        document.getElementById("form_id").submit();
+    }
+    function FillContents(){
+        var today = new Date();
+        var year=today.getFullYear().toString()
+        var month=(today.getMonth()+1).toString()
+        var day=today.getDate().toString()
+        if (month.length==1){
+            month='0'+month
+        }
+        if (day.length==1){
+            day='0'+day
+        }
+        document.getElementById("lang2").value = year+'-'+month+'-'+day
+        document.getElementById("workflowid").value = '$workflowid';
+    }
+</script>
+
+
 </html>
